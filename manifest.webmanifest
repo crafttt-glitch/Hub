@@ -1,0 +1,11 @@
+{
+  "name": "Manuais de Neurologia",
+  "short_name": "Manuais Neuro",
+  "description": "Coleção de manuais de neurologia de eo.clau.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#f8f9fa",
+  "theme_color": "#f8f9fa",
+  "lang": "pt-BR"
+}
