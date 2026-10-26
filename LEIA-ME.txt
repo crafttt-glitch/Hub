@@ -1,0 +1,11 @@
+HUB V43 — ACESSO OFFLINE
+
+Publique index.html, sw.js, manifest.webmanifest e a pasta icons juntos na mesma pasta do site, mantendo estes nomes. O manifesto não deve terminar em .txt.
+
+Abra o endereço HTTPS do Hub e aguarde “4 manuais disponíveis offline”. Depois pode fechar a aba e abrir o mesmo endereço, incluindo a barra final da pasta, sem internet. Não é necessário abrir cada manual antes: todos e suas fontes já fazem parte do index.html.
+
+“Manter salvo” pede proteção do armazenamento ao navegador. Mesmo sem essa proteção, a cópia funciona offline; o navegador ainda pode removê-la por falta de espaço. Limpar os dados do site, navegação privada ou outro navegador/dispositivo exige preparar novamente.
+
+Ao voltar à internet, uma versão válida é salva em segundo plano. Ela aparece na próxima abertura/recarga, sem reiniciar uma leitura em andamento. Uma atualização incompleta não substitui o HTML salvo.
+
+Se a versão antiga estiver em cache, reabra/recarregue o Hub com internet para receber esta versão e espere o aviso de disponibilidade offline. Abrir apenas index.html como arquivo local já funciona sem rede, mas não instala o cache do endereço do site.

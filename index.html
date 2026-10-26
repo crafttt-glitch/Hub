@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="manual-hub-build" content="43">
 <meta name="theme-color" content="#f8f9fa">
 <meta name="author" content="Claudemir Guimarães Pedroso Júnior">
 <meta name="creator-instagram" content="eo.clau">
@@ -140,12 +141,15 @@ body.native-manual>.hub{display:none!important}body.native-manual>.viewer{visibi
 .native-manual-chrome{position:fixed;top:0;left:0;right:0;z-index:6500}.native-manual-chrome>.viewer-bar{height:54px;box-sizing:border-box}
 body.native-manual .export-menu.open{z-index:9000}
 @media(max-width:600px){.native-manual-chrome>.viewer-bar{height:52px}}
-</style></head>
+</style><style>
+#hub .offline-access{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:18px 0 0;color:#4d6b62;font:500 11px/1.5 system-ui}#hub .offline-access button{border:1px solid #b8cec4;border-radius:7px;background:#edf4ed;color:#285d4f;padding:4px 8px;font:600 11px/1.4 system-ui;cursor:pointer}#hub .offline-access button[hidden]{display:none}#hub .offline-access button:focus-visible{outline:2px solid #286858;outline-offset:3px}
+</style>
+</head>
 <body>
 <main class="hub" id="hub">
   <div class="shell">
     <div class="hub-topbar"><div class="hub-wordmark"><svg class="hub-symbol" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 7v18M24 7v18M8 16h16M8 7l16 18M24 7L8 25"/><circle cx="8" cy="7" r="3"/><circle cx="24" cy="7" r="3"/><circle cx="8" cy="25" r="3"/><circle cx="24" cy="25" r="3"/></svg>Neurologia clínica</div><span>COLEÇÃO DE ESTUDO</span></div>
-    <header class="brand"><div><span class="eyebrow">DO RECONHECIMENTO À CONDUTA</span><h1>Conectar os sinais.<br><span>Construir o raciocínio.</span></h1><p class="subtitle">Etiologias, exame e síndromes. Teus manuais de neurologia, reunidos para estudar com profundidade e consultar com clareza.</p></div><div class="hub-hero-aside"><div class="hero-count">04<small>coleções<br>originais.</small></div><div class="hero-aside-rule"></div><p>Combine conteúdos.<br>Construa novas coleções.</p></div></header>
+    <header class="brand"><div><span class="eyebrow">DO RECONHECIMENTO À CONDUTA</span><h1>Conectar os sinais.<br><span>Construir o raciocínio.</span></h1><p class="subtitle">Etiologias, exame e síndromes. Teus manuais de neurologia, reunidos para estudar com profundidade e consultar com clareza.</p><div class="offline-access"><span id="offlineStatus" role="status">Preparando acesso offline…</span><button id="offlineRetry" type="button" hidden>Tentar novamente</button><button id="offlineProtect" type="button" hidden>Manter salvo</button></div></div><div class="hub-hero-aside"><div class="hero-count">04<small>coleções<br>originais.</small></div><div class="hero-aside-rule"></div><p>Combine conteúdos.<br>Construa novas coleções.</p></div></header>
     <section class="collection" aria-labelledby="collection-title">
       <div class="collection-head"><div class="collection-head-main"><h2 id="collection-title">Tuas coleções</h2><div class="hub-tabs" role="tablist" aria-label="Conteúdo do hub"><button class="hub-tab active" id="manualsTab" type="button" role="tab" aria-selected="true">Manuais</button><button class="hub-tab" id="libraryTab" type="button" role="tab" aria-selected="false">Biblioteca</button></div></div><div class="layout-controls" id="layoutControls" role="group" aria-label="Modo de visualização"><button class="layout-button" id="listMode" type="button" aria-label="Exibir em lista" title="Lista">☰</button><button class="layout-button" id="gridMode" type="button" aria-label="Exibir em grade" title="Grade">▦</button></div></div>
       <div class="manuals-pane" id="manualsPane"><div class="cards" id="cards" aria-live="polite"></div></div><div class="library-pane" id="libraryPane" hidden><p class="library-hint">Pesquise todos os grandes blocos editoriais da coleção e abra diretamente no ponto correspondente.</p><div class="library-tools"><label class="library-search-wrap" for="librarySearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg><input class="library-search" id="librarySearch" type="search" autocomplete="off" placeholder="Buscar etiologia, síndrome, fundamentos…"></label><span class="library-count" id="libraryCount"></span></div><div class="library-results" id="libraryResults" aria-live="polite"></div></div>
@@ -449,6 +453,16 @@ const NativeCardReader={
   this.host.addEventListener('touchcancel',()=>this.start=null,{passive:true});
   this.host.addEventListener('touchend',e=>{if(!this.start||e.touches.length){this.start=null;return}const t=e.changedTouches[0],dx=t.clientX-this.start.x,dy=t.clientY-this.start.y,toolbar=this.start.toolbar;this.start=null;if(!toolbar&&Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.6)this.step(dx<0?1:-1)},{passive:true});
   this.host.addEventListener('wheel',e=>{if(e.deltaY<0)this.showChrome(true)},{passive:true});
+  // A short tap on reading content dismisses the chrome without stealing text or link interactions.
+  this.content.addEventListener('pointerdown',e=>{this.contentTap=e.isPrimary&&e.button===0?{x:e.clientX,y:e.clientY,time:performance.now(),moved:false}:null},{passive:true});
+  this.content.addEventListener('pointermove',e=>{const tap=this.contentTap;if(tap&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>10)tap.moved=true},{passive:true});
+  this.content.addEventListener('pointercancel',()=>{this.contentTap=null},{passive:true});
+  this.content.addEventListener('click',e=>{const tap=this.contentTap;this.contentTap=null;if(!this.active||this.hidden||!tap||tap.moved||performance.now()-tap.time>600||e.defaultPrevented)return;
+   if(e.composedPath().some(el=>el?.matches?.('a,button,input,select,textarea,label,summary,[role="button"],[role="link"],[contenteditable]:not([contenteditable="false"])')))return;
+   if(String(window.getSelection()||'').trim()||String(this.shadow.getSelection?.()||'').trim())return;
+   this.showChrome(false);
+  });
+
   document.addEventListener('keydown',e=>{if(!this.active||Exporter.busy||DOM.exportMenu.classList.contains('open'))return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(this.back)this.back();else this.close()}else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();e.stopImmediatePropagation();this.step(e.key==='ArrowRight'?1:-1)}else if(['Tab','ArrowUp','PageUp','Home'].includes(e.key))this.showChrome(true)},true);
   this.shadow.addEventListener('click',e=>{const link=e.composedPath().find(el=>el?.tagName==='A');if(!link)return;
    if(link.dataset.collectionSource){e.preventDefault();this.close();Navigation.openBlock(link.dataset.collectionSource,link.dataset.sourceAnchor,'');return}
@@ -596,7 +610,11 @@ const Navigation={
 
 /* V39: browser/Android Back follows the reader's actual navigation levels. */
 const ReaderHistory={
- current:null,positions:new Map(),restoring:false,transition:0,serial:0,
+ current:null,positions:new Map(),restoring:false,transition:0,serial:0,memoryTimer:0,
+ memoryKey:'manual-reader-positions-v1',
+ loadMemory(){try{const saved=JSON.parse(sessionStorage.getItem(this.memoryKey)||'null');if(saved?.version===1&&Array.isArray(saved.positions))for(const [key,value] of saved.positions.slice(-100)){if(typeof key==='string'&&value&&Number.isFinite(value.y))this.positions.set(key,value)}}catch{}},
+ saveMemory(){clearTimeout(this.memoryTimer);this.memoryTimer=0;try{const entries=[...this.positions].slice(-100);this.positions=new Map(entries);sessionStorage.setItem(this.memoryKey,JSON.stringify({version:1,positions:entries}))}catch{}},
+ queueMemory(){if(!this.memoryTimer)this.memoryTimer=setTimeout(()=>{this.memoryTimer=0;if(!this.restoring)this.capture(true);else this.saveMemory()},250)},
  key(){return 'reader-'+Date.now().toString(36)+'-'+(++this.serial).toString(36)},
  stamp(state,key){const next={...(state||{})},meta={...(next.__reader||{})};meta.key=key||meta.key||this.key();meta.kind=meta.kind||(next.manual?'manual':next.note?'note':'hub');next.__reader=meta;return next},
  capture(persist=false){
@@ -604,8 +622,9 @@ const ReaderHistory={
   if(meta.kind==='card'){if(!NativeCardReader.active||NativeCardReader.record?.id!==state.manual)return;snapshot={x:scrollX,y:scrollY,cardId:NativeCardReader.units[NativeCardReader.index]?.dataset.sourceId,overview:{x:NativeCardReader.old?.x||0,y:NativeCardReader.old?.y||0},hidden:NativeCardReader.hidden}}
   else if(meta.kind==='manual'){if(!NativeManualOverview.active||NativeCardReader.active||NativeManualOverview.record?.id!==state.manual)return;snapshot={x:scrollX,y:scrollY}}
   else{if(State.activeId)return;snapshot={x:scrollX,y:scrollY}}
-  this.positions.set(meta.key,snapshot);
+  this.positions.delete(meta.key);this.positions.set(meta.key,snapshot);
   if(persist&&history.state?.__reader?.key===meta.key){this.current={...state,__reader:{...meta,...snapshot}};try{this.replace(this.current,'',location.href)}catch{}}
+  if(persist)this.saveMemory();else this.queueMemory();
  },
  ensure(){if(!history.state?.__reader){const next=this.stamp(history.state);try{this.replace(next,'',location.href)}catch{}this.current=next}else this.current=history.state},
  backCard(){if(!NativeCardReader.active)return;this.capture(true);if(this.current?.__reader?.kind==='card')history.back();else this.closeCard()},
@@ -639,7 +658,7 @@ const ReaderHistory={
   this.push=history.pushState.bind(history);this.replace=history.replaceState.bind(history);try{history.scrollRestoration='manual'}catch{}
   history.pushState=(state,title,url)=>{if(!this.restoring)this.capture(true);const next=this.stamp(state,this.key());this.push(next,title,url);this.current=next};
   history.replaceState=(state,title,url)=>{const next=this.stamp(state,state?.__reader?.key||history.state?.__reader?.key||this.key());this.replace(next,title,url);this.current=next};
-  this.ensure();
+  this.loadMemory();this.ensure();
   this.openViewer=Viewer.open.bind(Viewer);Viewer.open=async(id,anchor='')=>{if(!this.restoring&&MANUALS[id]&&history.state?.manual!==id)history.pushState({manual:id,anchor},'',anchor?'#biblioteca/'+id+'/'+encodeURIComponent(anchor):'#'+id);return this.openViewer(id,anchor)};
   this.openCard=NativeCardReader.open.bind(NativeCardReader);this.closeCard=NativeCardReader.close.bind(NativeCardReader);const step=NativeCardReader.step.bind(NativeCardReader);
   NativeCardReader.open=(record,unit)=>{
@@ -654,12 +673,14 @@ const ReaderHistory={
   this.syncNavigation=Navigation.sync.bind(Navigation);Navigation.sync=event=>this.sync(event);
   const home=Navigation.home.bind(Navigation);Navigation.home=()=>{this.capture(true);if(history.state?.__reader?.kind==='card'){history.go(-2);return}home()};
   const init=Navigation.init.bind(Navigation);Navigation.init=()=>{
+   // Reload must restore the existing entry, including card and prior overview position.
+   const existing=history.state;if(existing?.__reader&&(existing.manual&&MANUALS[existing.manual]||existing.note||existing.hub)){this.sync({state:existing});return}
    // A direct manual link still has an in-app Hub step behind it.
    const hash=location.hash.slice(1),deep=hash==='nota'||MANUALS[hash]||hash.startsWith('biblioteca/');
    if(deep&&!history.state?.manual&&!history.state?.note){const url=location.href,hub=this.stamp({hub:true});this.replace(hub,'',url.split('#')[0]);this.current=hub;history.pushState({},'',url)}
    init();this.ensure();
   };
-  addEventListener('scroll',()=>this.capture(false),{passive:true});addEventListener('pagehide',()=>this.capture(true));addEventListener('beforeunload',()=>this.capture(true));
+  addEventListener('scroll',()=>this.capture(false),{passive:true});addEventListener('pagehide',()=>{this.capture(true);this.saveMemory()});addEventListener('beforeunload',()=>{this.capture(true);this.saveMemory()});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){this.capture(true);this.saveMemory()}});
  }
 };
 ReaderHistory.install();
@@ -690,15 +711,56 @@ Navigation.init();
 const warm=()=>ManualLoader.prewarm();
 if('requestIdleCallback'in window)requestIdleCallback(warm,{timeout:1800});else setTimeout(warm,700);
 
-// O Service Worker precisa permanecer em um arquivo separado no Cloudflare Pages.
-// Online, verifica a versão publicada; offline, reutiliza a última versão aberta.
-if('serviceWorker' in navigator){
-  addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'})
-      .then(registration=>registration.update())
-      .catch(error=>console.warn('Modo offline indisponível:',error));
-  });
-}
+/* V43: verify the saved copy instead of assuming registration means offline readiness. */
+const OfflineAccess={
+ registration:null,ready:false,requesting:false,persisted:false,
+ init(){
+  this.label=document.getElementById('offlineStatus');this.retry=document.getElementById('offlineRetry');this.protect=document.getElementById('offlineProtect');
+  this.retry.addEventListener('click',()=>this.start());this.protect.addEventListener('click',()=>this.keep());
+  if(location.protocol==='file:'){this.set('Arquivo local · funciona sem internet');return}
+  if(!isSecureContext||!('serviceWorker'in navigator)){this.set('Acesso offline requer abrir o site por HTTPS');return}
+  navigator.serviceWorker.addEventListener('message',event=>{if(event.data?.type==='HUB_OFFLINE_STATUS')this.status(event.data)});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>this.check());
+  addEventListener('online',()=>{this.check();this.registration?.update().catch(()=>{});(navigator.serviceWorker.controller||this.registration?.active)?.postMessage({type:'HUB_OFFLINE_UPDATE'})});
+  addEventListener('offline',()=>this.check());
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')this.check()});
+  this.check();this.start();
+ },
+ set(text){this.label.textContent=text},
+ async start(){
+  if(this.requesting)return;this.requesting=true;this.retry.hidden=true;if(!this.ready)this.set('Preparando acesso offline…');
+  try{
+   const registration=await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});this.registration=registration;
+   const watch=worker=>{if(!worker)return;worker.addEventListener('statechange',()=>{if(worker.state==='activated')this.check();else if(worker.state==='redundant'&&!this.ready)this.failed()})};
+   watch(registration.installing);registration.addEventListener('updatefound',()=>watch(registration.installing));
+   navigator.serviceWorker.ready.then(()=>this.check()).catch(()=>{});
+   if(registration.active)this.check();registration.update().catch(()=>{});
+   clearTimeout(this.timer);this.timer=setTimeout(()=>{if(!this.ready)this.failed()},20000);
+  }catch{this.failed()}finally{this.requesting=false}
+ },
+ async check(){
+  const worker=navigator.serviceWorker.controller||this.registration?.active;if(!worker)return;
+  const channel=new MessageChannel();const timeout=setTimeout(()=>{channel.port1.close();if(!this.ready)this.failed()},4000);
+  channel.port1.onmessage=event=>{clearTimeout(timeout);channel.port1.close();if(event.data?.type==='HUB_OFFLINE_STATUS')this.status(event.data)};
+  try{worker.postMessage({type:'HUB_OFFLINE_STATUS'},[channel.port2])}catch{clearTimeout(timeout);channel.port1.close();this.failed()}
+ },
+ async status(data){
+  if(!data.ready){this.ready=false;this.failed();return}clearTimeout(this.timer);this.ready=true;this.retry.hidden=true;
+  this.set(navigator.onLine?'4 manuais disponíveis offline':'Sem internet · 4 manuais disponíveis');
+  try{this.persisted=await navigator.storage?.persisted?.()||false}catch{}
+  this.protect.hidden=this.persisted||!navigator.storage?.persist;
+  this.protect.textContent='Manter salvo';
+  this.protect.title='Pedir ao navegador para preservar os manuais neste dispositivo';
+ },
+ failed(){if(this.ready)return;this.set('Cópia offline ainda não confirmada');this.retry.hidden=false},
+ async keep(){
+  this.protect.disabled=true;
+  try{this.persisted=await navigator.storage.persist();if(this.persisted){this.protect.hidden=true;this.set('4 manuais disponíveis offline · armazenamento protegido')}else{this.protect.textContent='Cópia salva';this.protect.title='Disponível offline. O navegador não concedeu proteção contra limpeza automática.'}}
+  catch{this.protect.textContent='Cópia salva'}finally{this.protect.disabled=false}
+ }
+};
+OfflineAccess.init();
+
 </script>
 </body>
 </html>
